@@ -33,7 +33,6 @@
   "module": "dist-esm/src/index.js",
   "types": "types/latest/api-management-custom-widgets-tools.d.ts",
   "scripts": {
-    "audit": "node ../../../common/scripts/rush-audit.js && rimraf node_modules package-lock.json && npm i --package-lock-only 2>&1 && npm audit",
     "build:browser": "tsc -p . && dev-tool run bundle --browser-test=false",
     "build:node": "tsc -p . && dev-tool run bundle",
     "build:test": "npm run clean && tsc -p . && dev-tool run bundle",
