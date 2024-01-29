@@ -4,13 +4,13 @@
 
 ```ts
 
-import type { Agent } from 'openai/_shims/agent';
-import * as API from './resources/index.js';
+import { Agent } from './_shims/index.js';
+import * as API from 'openai/resources/index';
 import * as Core from './core.js';
 import * as Errors from './error.js';
-import { fileFromPath } from 'openai/_shims/fileFromPath';
-import { FilePropertyBag as FilePropertyBag_2 } from 'openai/_shims/formdata';
-import { FsReadStream } from 'openai/_shims/node-readable';
+import { fileFromPath } from './_shims/index.js';
+import { FilePropertyBag as FilePropertyBag_2 } from './_shims/index.js';
+import { FsReadStream } from './_shims/index.js';
 
 // @public (undocumented)
 export const APIConnectionError: typeof Errors.APIConnectionError;
@@ -32,16 +32,15 @@ export const BadRequestError: typeof Errors.BadRequestError;
 
 // @public (undocumented)
 export interface ClientOptions {
-    apiKey?: string;
-    baseURL?: string;
+    apiKey?: string | undefined;
+    baseURL?: string | null | undefined;
     dangerouslyAllowBrowser?: boolean;
     defaultHeaders?: Core.Headers;
     defaultQuery?: Core.DefaultQuery;
     fetch?: Core.Fetch | undefined;
     httpAgent?: Agent;
     maxRetries?: number;
-    // (undocumented)
-    organization?: string | null;
+    organization?: string | null | undefined;
     timeout?: number;
 }
 
@@ -58,7 +57,7 @@ export const NotFoundError: typeof Errors.NotFoundError;
 
 // @public
 class OpenAI extends Core.APIClient {
-    constructor({ apiKey, organization, ...opts }?: ClientOptions);
+    constructor({ baseURL, apiKey, organization, ...opts }?: ClientOptions);
     // (undocumented)
     static APIConnectionError: typeof Errors.APIConnectionError;
     // (undocumented)
@@ -78,6 +77,8 @@ class OpenAI extends Core.APIClient {
     // (undocumented)
     static BadRequestError: typeof Errors.BadRequestError;
     // (undocumented)
+    beta: API.Beta;
+    // (undocumented)
     chat: API.Chat;
     // (undocumented)
     completions: API.Completions;
@@ -88,13 +89,9 @@ class OpenAI extends Core.APIClient {
     // (undocumented)
     protected defaultQuery(): Core.DefaultQuery | undefined;
     // (undocumented)
-    edits: API.Edits;
-    // (undocumented)
     embeddings: API.Embeddings;
     // (undocumented)
     files: API.Files;
-    // (undocumented)
-    fineTunes: API.FineTunes;
     // (undocumented)
     fineTuning: API.FineTuning;
     // (undocumented)
@@ -110,7 +107,9 @@ class OpenAI extends Core.APIClient {
     // (undocumented)
     static OpenAI: typeof OpenAI;
     // (undocumented)
-    organization?: string | null;
+    static OpenAIError: typeof Errors.OpenAIError;
+    // (undocumented)
+    organization: string | null;
     // (undocumented)
     static PermissionDeniedError: typeof Errors.PermissionDeniedError;
     // (undocumented)
@@ -137,9 +136,28 @@ namespace OpenAI {
     import CompletionCreateParamsNonStreaming = API.CompletionCreateParamsNonStreaming;
     import CompletionCreateParamsStreaming = API.CompletionCreateParamsStreaming;
     import Chat = API.Chat;
-    import Edits = API.Edits;
-    import Edit = API.Edit;
-    import EditCreateParams = API.EditCreateParams;
+    import ChatCompletion = API.ChatCompletion;
+    import ChatCompletionAssistantMessageParam = API.ChatCompletionAssistantMessageParam;
+    import ChatCompletionChunk = API.ChatCompletionChunk;
+    import ChatCompletionContentPart = API.ChatCompletionContentPart;
+    import ChatCompletionContentPartImage = API.ChatCompletionContentPartImage;
+    import ChatCompletionContentPartText = API.ChatCompletionContentPartText;
+    import ChatCompletionFunctionCallOption = API.ChatCompletionFunctionCallOption;
+    import ChatCompletionFunctionMessageParam = API.ChatCompletionFunctionMessageParam;
+    import ChatCompletionMessage = API.ChatCompletionMessage;
+    import ChatCompletionMessageParam = API.ChatCompletionMessageParam;
+    import ChatCompletionMessageToolCall = API.ChatCompletionMessageToolCall;
+    import ChatCompletionNamedToolChoice = API.ChatCompletionNamedToolChoice;
+    import ChatCompletionRole = API.ChatCompletionRole;
+    import ChatCompletionSystemMessageParam = API.ChatCompletionSystemMessageParam;
+    import ChatCompletionTokenLogprob = API.ChatCompletionTokenLogprob;
+    import ChatCompletionTool = API.ChatCompletionTool;
+    import ChatCompletionToolChoiceOption = API.ChatCompletionToolChoiceOption;
+    import ChatCompletionToolMessageParam = API.ChatCompletionToolMessageParam;
+    import ChatCompletionUserMessageParam = API.ChatCompletionUserMessageParam;
+    import ChatCompletionCreateParams = API.ChatCompletionCreateParams;
+    import ChatCompletionCreateParamsNonStreaming = API.ChatCompletionCreateParamsNonStreaming;
+    import ChatCompletionCreateParamsStreaming = API.ChatCompletionCreateParamsStreaming;
     import Embeddings = API.Embeddings;
     import CreateEmbeddingResponse = API.CreateEmbeddingResponse;
     import Embedding = API.Embedding;
@@ -150,6 +168,7 @@ namespace OpenAI {
     import FileObject = API.FileObject;
     import FileObjectsPage = API.FileObjectsPage;
     import FileCreateParams = API.FileCreateParams;
+    import FileListParams = API.FileListParams;
     import Images = API.Images;
     import Image = API.Image;
     import ImagesResponse = API.ImagesResponse;
@@ -166,18 +185,15 @@ namespace OpenAI {
     import ModelDeleted = API.ModelDeleted;
     import ModelsPage = API.ModelsPage;
     import FineTuning = API.FineTuning;
-    import FineTunes = API.FineTunes;
-    import FineTune = API.FineTune;
-    import FineTuneEvent = API.FineTuneEvent;
-    import FineTuneEventsListResponse = API.FineTuneEventsListResponse;
-    import FineTunesPage = API.FineTunesPage;
-    import FineTuneCreateParams = API.FineTuneCreateParams;
-    import FineTuneListEventsParams = API.FineTuneListEventsParams;
-    import FineTuneListEventsParamsNonStreaming = API.FineTuneListEventsParamsNonStreaming;
-    import FineTuneListEventsParamsStreaming = API.FineTuneListEventsParamsStreaming;
+    import Beta = API.Beta;
+    import FunctionDefinition = API.FunctionDefinition;
+    import FunctionParameters = API.FunctionParameters;
 }
 export { OpenAI }
 export default OpenAI;
+
+// @public (undocumented)
+export const OpenAIError: typeof Errors.OpenAIError;
 
 // @public (undocumented)
 export const PermissionDeniedError: typeof Errors.PermissionDeniedError;
@@ -189,11 +205,7 @@ export const RateLimitError: typeof Errors.RateLimitError;
 // Warning: (ae-forgotten-export) The symbol "FileLike" needs to be exported by the entry point index.d.ts
 //
 // @public
-export function toFile(
-value: ToFileInput | PromiseLike<ToFileInput>,
-name?: string | null | undefined,
-options?: FilePropertyBag_2 | undefined,
-): Promise<FileLike>;
+export function toFile(value: ToFileInput | PromiseLike<ToFileInput>, name?: string | null | undefined, options?: FilePropertyBag_2 | undefined): Promise<FileLike>;
 
 // @public (undocumented)
 export const UnprocessableEntityError: typeof Errors.UnprocessableEntityError;
