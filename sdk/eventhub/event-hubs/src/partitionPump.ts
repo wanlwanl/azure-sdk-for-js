@@ -62,11 +62,13 @@ export class PartitionPump {
    * Creates a new `PartitionReceiver` and replaces any existing receiver.
    * @param partitionId - The partition the receiver should read messages from.
    * @param lastSeenSequenceNumber - The sequence number to begin receiving messages from (exclusive).
+   * @param lastSeenReplicationSegment - The replication segment associated with {@link lastSeenSequenceNumber}.
    * If `-1`, then the PartitionPump's startPosition will be used instead.
    */
   private _setOrReplaceReceiver(
     partitionId: string,
-    lastSeenSequenceNumber: number
+    lastSeenSequenceNumber: number,
+    lastSeenReplicationSegment: number
   ): PartitionReceiver {
     // Determine what the new EventPosition should be.
     // If this PartitionPump has received events, we'll start from the last
@@ -76,6 +78,7 @@ export class PartitionPump {
       lastSeenSequenceNumber >= 0
         ? {
             sequenceNumber: lastSeenSequenceNumber,
+            replicationSegment: lastSeenReplicationSegment,
             isInclusive: false,
           }
         : this._startPosition;
@@ -101,13 +104,22 @@ export class PartitionPump {
 
   private async _receiveEvents(partitionId: string): Promise<void> {
     let lastSeenSequenceNumber = -1;
-    let receiver = this._setOrReplaceReceiver(partitionId, lastSeenSequenceNumber);
+    let lastSeenReplicationSegment = -1;
+    let receiver = this._setOrReplaceReceiver(
+      partitionId,
+      lastSeenSequenceNumber,
+      lastSeenReplicationSegment
+    );
 
     while (this._isReceiving) {
       try {
         // Check if the receiver was closed so we can recreate it.
         if (receiver.isClosed) {
-          receiver = this._setOrReplaceReceiver(partitionId, lastSeenSequenceNumber);
+          receiver = this._setOrReplaceReceiver(
+            partitionId,
+            lastSeenSequenceNumber,
+            lastSeenReplicationSegment
+          );
         }
 
         const receivedEvents = await receiver.receiveBatch(
@@ -129,7 +141,9 @@ export class PartitionPump {
         }
 
         if (receivedEvents.length) {
-          lastSeenSequenceNumber = receivedEvents[receivedEvents.length - 1].sequenceNumber;
+          const lastEvent = receivedEvents[receivedEvents.length - 1];
+          lastSeenSequenceNumber = lastEvent.sequenceNumber;
+          lastSeenReplicationSegment = lastEvent.replicationSegment;
         }
 
         await tracingClient.withSpan(

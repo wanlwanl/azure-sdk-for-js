@@ -78,6 +78,14 @@ export interface PartitionProperties {
    */
   lastEnqueuedSequenceNumber: number;
   /**
+   * The last replication segment of the partition's message log. Used in conjunction with the sequence number if using a geo replication enabled Event Hubs namespace.
+   */
+  lastEnqueuedReplicationSegment: number;
+  /**
+   * The starting replication segment of the partition's message log. Used in conjunction with the sequence number if using a geo replication enabled Event Hubs namespace.
+   */
+  beginningReplicationSegment: number;
+  /**
    * The offset of the last enqueued message in the partition's message log.
    */
   lastEnqueuedOffset: number;
@@ -273,6 +281,8 @@ export class ManagementClient {
             lastEnqueuedOffset: info.last_enqueued_offset,
             lastEnqueuedOnUtc: new Date(info.last_enqueued_time_utc),
             lastEnqueuedSequenceNumber: info.last_enqueued_sequence_number,
+            lastEnqueuedReplicationSegment: info.last_enqueued_sequence_number_epoch,
+            beginningReplicationSegment: info.begin_sequence_number_epoch,
             partitionId: info.partition,
             isEmpty: info.is_partition_empty,
           };

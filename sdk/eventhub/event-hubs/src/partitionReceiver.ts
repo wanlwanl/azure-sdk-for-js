@@ -58,6 +58,12 @@ export interface LastEnqueuedEventProperties {
    */
   sequenceNumber?: number;
   /**
+   * The replication segment of the event that was last enqueued into the Event Hub partition from which
+   * this event was received. Used in conjunction with the sequence number if using a geo replication
+   * enabled Event Hubs namespace.
+   */
+  replicationSegment?: number;
+  /**
    * The date and time, in UTC, that the last event was enqueued into the Event Hub partition from
    * which this event was received.
    */
@@ -75,7 +81,8 @@ export interface LastEnqueuedEventProperties {
 
 /** @internal */
 export interface PartitionReceiver {
-  readonly checkpoint: number;
+  readonly checkpointSequenceNumber: number;
+  readonly checkpointReplicationSegment: number;
   readonly lastEnqueuedEventProperties: LastEnqueuedEventProperties;
   readonly isClosed: boolean;
   readonly close: () => Promise<void>;
@@ -123,7 +130,8 @@ export function createReceiver(
 
   const obj: WritableReceiver = {
     _onError: undefined,
-    checkpoint: -1,
+    checkpointSequenceNumber: -1,
+    checkpointReplicationSegment: -1,
     lastEnqueuedEventProperties: {},
     isClosed: false,
     close: async () => {
@@ -386,6 +394,7 @@ function convertAMQPMesage(data: EventDataInternal): ReceivedEventData {
     properties: data.properties,
     offset: data.offset!,
     sequenceNumber: data.sequenceNumber!,
+    replicationSegment: data.replicationSegment!,
     enqueuedTimeUtc: data.enqueuedTimeUtc!,
     partitionKey: data.partitionKey!,
     systemProperties: data.systemProperties,
@@ -407,6 +416,7 @@ function convertAMQPMesage(data: EventDataInternal): ReceivedEventData {
 
 function setEventProps(eventProps: LastEnqueuedEventProperties, data: EventDataInternal): void {
   eventProps.sequenceNumber = data.lastSequenceNumber;
+  eventProps.replicationSegment = data.replicationSegment;
   eventProps.enqueuedOn = data.lastEnqueuedTime;
   eventProps.offset = data.lastEnqueuedOffset;
   eventProps.retrievedOn = data.retrievalTime;
@@ -427,7 +437,8 @@ function onMessage(
   }
   const data = fromRheaMessage(context.message, !!options.skipParsingBodyAsJson);
   const receivedEventData = convertAMQPMesage(data);
-  obj.checkpoint = receivedEventData.sequenceNumber;
+  obj.checkpointSequenceNumber = receivedEventData.sequenceNumber;
+  obj.checkpointReplicationSegment = receivedEventData.replicationSegment;
   if (options.trackLastEnqueuedEventProperties) {
     setEventProps(obj.lastEnqueuedEventProperties, data);
   }
@@ -532,7 +543,12 @@ function createRheaOptions(
     rheaOptions.desired_capabilities = Constants.enableReceiverRuntimeMetricName;
   }
   const filterClause = getEventPositionFilter(
-    obj.checkpoint > -1 ? { sequenceNumber: obj.checkpoint } : eventPosition
+    obj.checkpointSequenceNumber > -1
+      ? {
+          sequenceNumber: obj.checkpointSequenceNumber,
+          replicationSegment: obj.checkpointReplicationSegment,
+        }
+      : eventPosition
   );
   rheaOptions.source.filter = {
     "apache.org:selector-filter:string": types.wrap_described(filterClause, 0x468c00000004),

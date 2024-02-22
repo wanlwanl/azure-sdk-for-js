@@ -96,6 +96,10 @@ export interface EventDataInternal {
    */
   sequenceNumber?: number;
   /**
+   * The replication segment of the event. Used in conjunction with the sequence number if using a geo replication enabled Event Hubs namespace.
+   */
+  replicationSegment?: number;
+  /**
    * The application specific properties.
    */
   properties?: { [property: string]: any };
@@ -201,6 +205,9 @@ export function fromRheaMessage(
           break;
         case Constants.sequenceNumber:
           data.sequenceNumber = msg.message_annotations[annotationKey];
+          break;
+        case Constants.replicationSegment:
+          data.replicationSegment = msg.message_annotations[annotationKey];
           break;
         case Constants.enqueuedTime:
           data.enqueuedTimeUtc = new Date(msg.message_annotations[annotationKey]);
@@ -410,6 +417,10 @@ export interface ReceivedEventData {
    * The sequence number of the event.
    */
   sequenceNumber: number;
+  /**
+   * The replication segment of the event. Used in conjunction with the sequence number if using a geo replication enabled Event Hubs namespace.
+   */
+  replicationSegment: number;
   /**
    * The properties set by the service.
    */

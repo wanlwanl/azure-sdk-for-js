@@ -41,6 +41,12 @@ export interface EventPosition {
    * Expected to be undefined if the position is just created from an offset or enqueued time.
    */
   sequenceNumber?: number;
+  /**
+   * The replication segment of the event identified by this position. Expected to be -1 if the position is just
+   * created from an offset or enqueued time. Used in conjunction with the sequence number if using a geo
+   * replication enabled Event Hubs namespace.
+   */
+  replicationSegment?: number;
 }
 
 /**
@@ -51,14 +57,14 @@ export interface EventPosition {
 export function getEventPositionFilter(eventPosition: EventPosition): string {
   let result;
   // order of preference
-  if (isDefined(eventPosition.offset)) {
+  if (isDefined(eventPosition.sequenceNumber)) {
+    result = `${Constants.sequenceNumberAnnotation} >${eventPosition.isInclusive ? "=" : ""} '${
+      eventPosition.replicationSegment
+    }:${eventPosition.sequenceNumber}'`;
+  } else if (isDefined(eventPosition.offset)) {
     result = eventPosition.isInclusive
       ? `${Constants.offsetAnnotation} >= '${eventPosition.offset}'`
       : `${Constants.offsetAnnotation} > '${eventPosition.offset}'`;
-  } else if (isDefined(eventPosition.sequenceNumber)) {
-    result = eventPosition.isInclusive
-      ? `${Constants.sequenceNumberAnnotation} >= '${eventPosition.sequenceNumber}'`
-      : `${Constants.sequenceNumberAnnotation} > '${eventPosition.sequenceNumber}'`;
   } else if (isDefined(eventPosition.enqueuedOn)) {
     const time =
       eventPosition.enqueuedOn instanceof Date
@@ -94,6 +100,7 @@ export function isLatestPosition(eventPosition: EventPosition): boolean {
  */
 export const earliestEventPosition: EventPosition = {
   offset: -1,
+  replicationSegment: -1,
 };
 
 /**
@@ -104,6 +111,7 @@ export const earliestEventPosition: EventPosition = {
  */
 export const latestEventPosition: EventPosition = {
   offset: "@latest",
+  replicationSegment: -1,
 };
 
 /**
@@ -147,11 +155,11 @@ export function isEventPosition(position: unknown): position is EventPosition {
     return false;
   }
 
-  if (objectHasProperty(position, "offset") && isDefined(position.offset)) {
+  if (objectHasProperty(position, "sequenceNumber") && isDefined(position.sequenceNumber)) {
     return true;
   }
 
-  if (objectHasProperty(position, "sequenceNumber") && isDefined(position.sequenceNumber)) {
+  if (objectHasProperty(position, "offset") && isDefined(position.offset)) {
     return true;
   }
 

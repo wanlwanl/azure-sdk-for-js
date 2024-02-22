@@ -235,6 +235,7 @@ export const Constants: {
     readonly associatedLinkName: "associated-link-name";
     readonly partitionKey: "x-opt-partition-key";
     readonly sequenceNumber: "x-opt-sequence-number";
+    readonly replicationSegment: "x-opt-sequence-number-epoch";
     readonly enqueueSequenceNumber: "x-opt-enqueue-sequence-number";
     readonly enqueuedTime: "x-opt-enqueued-time";
     readonly scheduledEnqueueTime: "x-opt-scheduled-enqueue-time";

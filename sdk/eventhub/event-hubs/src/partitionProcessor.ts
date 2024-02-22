@@ -46,6 +46,10 @@ export interface Checkpoint {
    */
   sequenceNumber: number;
   /**
+   * The replication segment to associate with the checkpoint. Used in conjunction with the sequence number if using a geo replication enabled Event Hubs namespace.
+   */
+  replicationSegment: number;
+  /**
    * The offset of the event.
    */
   offset: number;
@@ -190,6 +194,7 @@ export class PartitionProcessor implements PartitionContext {
       consumerGroup: this._context.consumerGroup,
       partitionId: this._context.partitionId,
       sequenceNumber: eventData.sequenceNumber,
+      replicationSegment: eventData.replicationSegment,
       offset: eventData.offset,
     };
 

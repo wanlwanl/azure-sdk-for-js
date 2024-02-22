@@ -349,7 +349,8 @@ export class EventProcessor {
     );
 
     if (validCheckpoints.length > 0) {
-      return { offset: validCheckpoints[0].offset };
+      const { sequenceNumber, replicationSegment } = validCheckpoints[0];
+      return { sequenceNumber, replicationSegment };
     }
 
     logger.verbose(

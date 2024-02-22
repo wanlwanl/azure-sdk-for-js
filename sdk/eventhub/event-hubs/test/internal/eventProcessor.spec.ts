@@ -130,7 +130,7 @@ testWithServiceTypes((serviceVersion) => {
         const emptyCheckpointStore = createCheckpointStore([]);
 
         function createCheckpointStore(
-          checkpointsForTest: Pick<Checkpoint, "offset" | "sequenceNumber" | "partitionId">[]
+          checkpointsForTest: Pick<Checkpoint, "replicationSegment" | "offset" | "sequenceNumber" | "partitionId">[]
         ): CheckpointStore {
           return {
             claimOwnership: async () => {
@@ -144,6 +144,7 @@ testWithServiceTypes((serviceVersion) => {
                   eventHubName: "not-used-for-this-test",
                   offset: cp.offset,
                   sequenceNumber: cp.sequenceNumber,
+                  replicationSegment: cp.replicationSegment,
                   partitionId: cp.partitionId,
                 };
               });
@@ -180,6 +181,7 @@ testWithServiceTypes((serviceVersion) => {
               offset: 1009,
               sequenceNumber: 1010,
               partitionId: "0",
+              replicationSegment: -1,
             },
           ]);
 
@@ -190,8 +192,9 @@ testWithServiceTypes((serviceVersion) => {
           );
 
           const eventPosition = await processor["_getStartingPosition"]("0");
-          eventPosition!.offset!.should.equal(1009);
-          should.not.exist(eventPosition!.sequenceNumber);
+          eventPosition!.sequenceNumber!.should.equal(1010);
+          eventPosition!.replicationSegment!.should.equal(-1);
+          should.not.exist(eventPosition!.offset);
         });
 
         it("checkpoint with falsy values", async () => {
@@ -203,13 +206,15 @@ testWithServiceTypes((serviceVersion) => {
               offset: 0,
               sequenceNumber: 0,
               partitionId: "0",
+              replicationSegment: -1,
             },
           ]);
 
           const processor = createEventProcessor(checkpointStore);
 
           const eventPosition = await processor["_getStartingPosition"]("0");
-          eventPosition!.offset!.should.equal(0);
+          eventPosition!.sequenceNumber!.should.equal(0);
+          eventPosition!.replicationSegment!.should.equal(-1);
           should.not.exist(eventPosition!.sequenceNumber);
         });
 
@@ -884,6 +889,7 @@ testWithServiceTypes((serviceVersion) => {
           partitionId: "0",
           sequenceNumber: 10,
           offset: 50,
+          replicationSegment: -1
         };
 
         await inMemoryCheckpointStore.updateCheckpoint(checkpoint);

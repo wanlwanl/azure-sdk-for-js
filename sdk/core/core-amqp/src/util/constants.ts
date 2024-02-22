@@ -5,6 +5,7 @@ export const Constants = {
   associatedLinkName: "associated-link-name",
   partitionKey: "x-opt-partition-key",
   sequenceNumber: "x-opt-sequence-number",
+  replicationSegment: "x-opt-sequence-number-epoch",
   enqueueSequenceNumber: "x-opt-enqueue-sequence-number",
   enqueuedTime: "x-opt-enqueued-time",
   scheduledEnqueueTime: "x-opt-scheduled-enqueue-time",
