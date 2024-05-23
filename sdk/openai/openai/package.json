@@ -1,12 +1,11 @@
 {
   "name": "@azure/openai",
-  "version": "1.0.0-beta.13",
-  "description": "An isomorphic client library for Azure OpenAI.",
+  "version": "2.0.0-beta.1",
+  "description": "A companion library to openai for Azure OpenAI.",
   "sdk-type": "client",
   "main": "dist/index.cjs",
   "module": "dist-esm/src/index.js",
   "browser": {
-    "./dist-esm/src/api/getSSEs.js": "./dist-esm/src/api/getSSEs.browser.js",
     "./dist-esm/test/public/utils/images.js": "./dist-esm/test/public/utils/images.browser.js"
   },
   "type": "module",
@@ -16,10 +15,6 @@
       "require": "./dist/index.cjs",
       "import": "./dist-esm/src/index.js"
     },
-    "./api": {
-      "types": "./types/src/api/index.d.ts",
-      "import": "./dist-esm/src/api/index.js"
-    },
     "./models": {
       "types": "./types/src/models/index.d.ts",
       "import": "./dist-esm/src/models/index.js"
@@ -28,14 +23,6 @@
       "types": "./types/src/rest/index.d.ts",
       "import": "./dist-esm/src/rest/index.js"
     }
-  },
-  "//metadata": {
-    "constantPaths": [
-      {
-        "path": "src/rest/openAIClient.ts",
-        "prefix": "userAgentInfo"
-      }
-    ]
   },
   "types": "openai.shims.d.ts",
   "scripts": {
@@ -98,6 +85,7 @@
   "prettier": "@azure/eslint-plugin-azure-sdk/prettier.json",
   "devDependencies": {
     "@azure/arm-cognitiveservices": "^7.5.0",
+    "@azure/core-util": "^1.4.0",
     "@azure/dev-tool": "^1.0.0",
     "@azure/eslint-plugin-azure-sdk": "^3.0.0",
     "@azure/identity": "^4.0.1",
@@ -126,18 +114,13 @@
     "karma-sourcemap-loader": "^0.3.8",
     "mocha": "^10.0.0",
     "nyc": "^15.1.0",
+    "openai": "^4.47.1",
     "puppeteer": "^22.2.0",
     "rimraf": "^3.0.2",
     "ts-node": "^10.0.0",
     "typescript": "~5.4.5"
   },
   "dependencies": {
-    "@azure-rest/core-client": "^1.1.7",
-    "@azure/core-util": "^1.4.0",
-    "@azure/core-auth": "^1.4.0",
-    "@azure/core-sse": "^2.0.0",
-    "@azure/core-rest-pipeline": "^1.13.0",
-    "@azure/logger": "^1.0.3",
     "tslib": "^2.4.0"
   },
   "//sampleConfiguration": {
