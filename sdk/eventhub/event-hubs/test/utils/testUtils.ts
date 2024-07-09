@@ -1,10 +1,33 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { EventHubConsumerClient, EventHubProducerClient, EventPosition } from "../../src/index.js";
+import {
+  EventHubConsumerClient,
+  EventHubProducerClient,
+  EventPosition,
+  Subscription,
+} from "../../src/index.js";
 import { TestTracer, resetTracer, setTracer } from "@azure-tools/test-utils";
-import { delay } from "@azure/core-amqp";
+import { delay, MessagingError } from "@azure/core-amqp";
 import { loggerForTest } from "./logHelpers.js";
+
+export async function getSubscriptionPromise(
+  client: EventHubConsumerClient,
+): Promise<MessagingError | Error> {
+  let subscription: Subscription | undefined;
+  const caughtErr = await new Promise<Error | MessagingError>((resolve) => {
+    subscription = client.subscribe({
+      processEvents: async () => {
+        /* no-op */
+      },
+      processError: async (err: any) => {
+        resolve(err);
+      },
+    });
+  });
+  await subscription?.close();
+  return caughtErr;
+}
 
 export async function loopUntil(args: {
   name: string;

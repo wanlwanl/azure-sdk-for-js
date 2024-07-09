@@ -1,11 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { EventHubConsumerClient, EventHubProducerClient } from "../../../src/index.js";
+import type { EventHubConsumerClient, EventHubProducerClient } from "../../../src/index.js";
+import { tracingClient } from "../../../src/diagnostics/tracing.js";
 import { assert } from "@azure-tools/test-utils";
 import { describe, it, afterEach, vi, expect } from "vitest";
-
-import { tracingClient } from "../../../src/diagnostics/tracing.js";
 import { createConsumer } from "../../utils/clients.js";
 
 describe("Create clients using Azure Identity (Internal)", function (): void {
@@ -20,7 +19,7 @@ describe("Create clients using Azure Identity (Internal)", function (): void {
   // the `getEventHubProperties` method is being traced correctly, that the
   // tracing span is properly parented and closed.
   it.skip("getEventHubProperties() creates a span with a peer.address attribute as the FQDN", async () => {
-    const { client: consumer, fqdn, eventhubName } = createConsumer();
+    const { consumer, fqdn, eventhubName } = createConsumer();
     client = consumer;
     assert.equal(client.fullyQualifiedNamespace, fqdn);
     assert.equal(client.eventHubName, eventhubName);
@@ -30,7 +29,7 @@ describe("Create clients using Azure Identity (Internal)", function (): void {
     // Ensure tracing is implemented correctly
     await assert.supportsTracing(
       (options) => client.getEventHubProperties(options),
-      ["ManagementClient.getEventHubProperties"]
+      ["ManagementClient.getEventHubProperties"],
     );
 
     // Additional validation that we created the correct initial span options
@@ -46,7 +45,7 @@ describe("Create clients using Azure Identity (Internal)", function (): void {
       expect.anything(),
       expect.anything(),
       expect.anything(),
-      expectedSpanOptions
+      expectedSpanOptions,
     );
   });
 });
